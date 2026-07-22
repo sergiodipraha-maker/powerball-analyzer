@@ -1,0 +1,12 @@
+{
+  "game": "Powerball",
+  "matrix": {
+    "main_count": 5,
+    "main_max": 69,
+    "powerball_count": 1,
+    "powerball_max": 26
+  },
+  "source": "Official Powerball results should be inserted or refreshed by the update script.",
+  "last_updated": null,
+  "draws": []
+}
