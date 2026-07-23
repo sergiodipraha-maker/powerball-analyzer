@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d16">
+<meta name="description" content="Powerball Engine: live-база, Core Pool, 7 ліній та walk-forward backtest.">
+<title>Powerball Engine v5</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090d16;color:#f7f8fb;font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.55}.wrap{width:min(1080px,calc(100% - 32px));margin:auto}.hero{padding:0 0 90px;background:radial-gradient(circle at 80% 20%,#51202b 0,transparent 28%),linear-gradient(135deg,#070a11,#101725)}nav{height:76px;display:flex;align-items:center;justify-content:space-between}nav a{color:#aab4c6;text-decoration:none}.hero h1{font-size:clamp(3.5rem,12vw,7rem);line-height:.88;letter-spacing:-.06em;margin:80px 0 25px}.hero h1 span{color:#ff314f}.lead{color:#aab4c6;max-width:760px}.eyebrow{color:#ffbf45;letter-spacing:.18em;font-size:.75rem;font-weight:900}.btn{display:inline-flex;border:0;border-radius:13px;background:#ff314f;color:white;padding:14px 20px;font-weight:800;text-decoration:none;margin:10px 8px 0 0}.ghost{background:#222c3d}.section{padding:78px 0}.alt{background:#0d1320;border-block:1px solid #ffffff12}h2{font-size:clamp(2rem,6vw,3.6rem);line-height:1.02;margin:0 0 22px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metrics div,.panel,.status,.draw-row{background:#141d2e;border:1px solid #ffffff12;border-radius:18px;padding:20px}.metrics b{display:block;font-size:1.5rem}.metrics span,.small{color:#aab4c6;font-size:.82rem}.status{margin:20px 0}.grid{display:grid;grid-template-columns:300px 1fr;gap:22px}.panel label{display:block;color:#aab4c6}.panel input{width:100%;margin:12px 0}.draws{display:grid;gap:10px}.draw-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.date{color:#aab4c6;min-width:92px}.ball{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#f4f6fa;color:#0b1019;font-weight:900}.pb{background:#ff314f;color:#fff}.backtest{margin-top:22px;overflow:auto}table{border-collapse:collapse;width:100%}th,td{padding:10px;border-bottom:1px solid #ffffff12;text-align:left}footer{padding:28px 0;color:#7f899a;border-top:1px solid #ffffff12}@media(max-width:760px){.metrics{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero h1{margin-top:55px}.date{width:100%}}
+.notice{margin-top:14px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.035);color:var(--muted)}
+.progress{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:14px 0}
+.progress>span{display:block;height:100%;width:0;background:var(--accent);transition:width .2s ease}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+<nav><strong>🔴 Powerball Engine v5</strong><a href="#backtest">Backtest</a></nav>
+<p class="eyebrow">LIVE DATA · SINGLE FILE</p>
+<h1>Powerball<br><span>Analyzer</span></h1>
+<p class="lead">Один файл для GitHub Pages: до 1 000 офіційних тиражів, Core Pool, 7 ліній і чесне walk-forward тестування.</p>
+<a class="btn" href="#generator">Згенерувати 7 ліній</a>
+</div></header>
+
+<main>
+<section class="section"><div class="wrap">
+<p class="eyebrow">БАЗА ДАНИХ</p><h2>Офіційні історичні тиражі</h2>
+<div class="metrics">
+<div><b id="drawCount">Завантаження…</b><span>тиражів чинного формату</span></div>
+<div><b id="lastDate">—</b><span>останній тираж</span></div>
+<div><b id="hotMain">—</b><span>часті основні</span></div>
+<div><b id="hotPB">—</b><span>часті Powerball</span></div>
+</div>
+<p id="dataStatus" class="status">Підключення до офіційної відкритої бази…</p>
+<div class="notice">Для аналізу використовуються лише тиражі матриці <strong>5/69 + 1/26</strong> від 07.10.2015. Якщо зовнішня база тимчасово недоступна, сайт переходить на резервні 30 тиражів і чітко це показує.</div>
+<div id="recentDraws" class="draws"></div>
+</div></section>
+
+<section id="generator" class="section alt"><div class="wrap">
+<p class="eyebrow">CORE POOL</p><h2>7 аналітичних ліній</h2>
+<div class="grid">
+<div class="panel">
+<label>Розмір Core Pool <input id="poolSize" type="range" min="12" max="24" value="18"><strong id="poolSizeValue">18</strong></label>
+<button id="generateBtn" class="btn">Оновити лінії</button>
+<button id="copyBtn" class="btn ghost">Копіювати</button>
+<p class="small">Частота та recency не передбачають майбутній тираж. Метод лише організовує покриття семи квитків.</p>
+</div>
+<div class="panel"><div id="generatedLines" class="draws"></div><div id="coverage" class="status"></div></div>
+</div>
+</div></section>
+
+<section id="backtest" class="section"><div class="wrap">
+<p class="eyebrow">ЧЕСНА ПЕРЕВІРКА</p><h2>Walk-forward backtest</h2>
+<p class="lead">Для кожного тестового тиражу система використовує тільки попередні результати, після чого порівнює Balanced Core Pool із випадковими сімома лініями.</p>
+<button id="backtestBtn" class="btn">Запустити backtest</button>
+<div class="progress"><span id="progressBar"></span></div>
+<div id="backtestResult" class="panel backtest">Ще не запущено.</div>
+</div></section>
+</main>
+
+<footer><div class="wrap">Аналітичний інструмент, не прогноз і не гарантія виграшу. Грайте відповідально.</div></footer>
+
+<script>
+"use strict";
+const MAIN_MAX=69,PB_MAX=26,MAX_DRAWS=1000,MATRIX_START="2015-10-07";
+const LIVE_DATA_URL="https://data.ny.gov/resource/d6yy-54nr.json?$limit=5000&$order=draw_date%20DESC";
+const FALLBACK_DRAWS=[{"date": "2026-07-20", "main": [2, 9, 44, 53, 59], "powerball": 8}, {"date": "2026-07-18", "main": [9, 14, 44, 50, 56], "powerball": 3}, {"date": "2026-07-15", "main": [2, 7, 18, 29, 38], "powerball": 16}, {"date": "2026-07-13", "main": [5, 25, 36, 40, 48], "powerball": 3}, {"date": "2026-07-11", "main": [8, 10, 14, 45, 59], "powerball": 5}, {"date": "2026-07-08", "main": [12, 29, 37, 43, 55], "powerball": 18}, {"date": "2026-07-06", "main": [17, 44, 63, 66, 67], "powerball": 4}, {"date": "2026-07-04", "main": [17, 38, 46, 50, 69], "powerball": 20}, {"date": "2026-07-01", "main": [2, 6, 26, 39, 68], "powerball": 6}, {"date": "2026-06-29", "main": [10, 14, 41, 53, 59], "powerball": 3}, {"date": "2026-06-27", "main": [3, 16, 28, 30, 59], "powerball": 11}, {"date": "2026-06-24", "main": [13, 14, 16, 21, 38], "powerball": 14}, {"date": "2026-06-22", "main": [17, 19, 21, 45, 48], "powerball": 13}, {"date": "2026-06-20", "main": [16, 20, 44, 48, 50], "powerball": 15}, {"date": "2026-06-17", "main": [3, 26, 49, 53, 61], "powerball": 12}, {"date": "2026-06-15", "main": [25, 55, 57, 60, 62], "powerball": 23}, {"date": "2026-06-13", "main": [3, 13, 44, 50, 53], "powerball": 2}, {"date": "2026-06-10", "main": [12, 31, 38, 60, 66], "powerball": 14}, {"date": "2026-06-08", "main": [3, 24, 34, 43, 49], "powerball": 20}, {"date": "2026-06-06", "main": [16, 32, 55, 59, 64], "powerball": 3}, {"date": "2026-06-03", "main": [14, 16, 38, 55, 64], "powerball": 12}, {"date": "2026-06-01", "main": [2, 42, 47, 57, 58], "powerball": 14}, {"date": "2026-05-30", "main": [1, 27, 35, 44, 52], "powerball": 12}, {"date": "2026-05-27", "main": [5, 14, 21, 31, 51], "powerball": 13}, {"date": "2026-05-25", "main": [17, 32, 48, 60, 64], "powerball": 10}, {"date": "2026-05-23", "main": [4, 16, 41, 48, 66], "powerball": 26}, {"date": "2026-05-20", "main": [10, 28, 30, 46, 57], "powerball": 25}, {"date": "2026-05-18", "main": [4, 13, 34, 61, 65], "powerball": 12}, {"date": "2026-05-16", "main": [8, 37, 40, 44, 65], "powerball": 18}, {"date": "2026-05-13", "main": [22, 31, 52, 56, 67], "powerball": 15}];
+let draws=[],currentLines=[];
+const $=s=>document.querySelector(s);
+const formatDate=d=>new Date(d+"T00:00:00").toLocaleDateString("uk-UA");
+function shuffle(input){const a=[...input];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function parseOfficialRow(row){const raw=String(row.winning_numbers||"").trim();const numbers=raw.split(/\s+/).map(Number).filter(Number.isFinite);const date=String(row.draw_date||"").slice(0,10);if(numbers.length<6||!date)return null;const main=numbers.slice(0,5).sort((a,b)=>a-b),powerball=numbers[5];if(date<MATRIX_START||new Set(main).size!==5||main.some(n=>n<1||n>MAIN_MAX)||powerball<1||powerball>PB_MAX)return null;return{date,main,powerball}}
+async function loadDraws(){const status=$("#dataStatus");try{status.textContent="⏳ Завантаження офіційних результатів…";const response=await fetch(LIVE_DATA_URL,{headers:{Accept:"application/json"},cache:"no-store"});if(!response.ok)throw new Error("HTTP "+response.status);const rows=await response.json(),unique=[],seen=new Set();for(const row of rows){const draw=parseOfficialRow(row);if(!draw)continue;const key=draw.date+"|"+draw.main.join("-")+"|"+draw.powerball;if(seen.has(key))continue;seen.add(key);unique.push(draw);if(unique.length>=MAX_DRAWS)break}unique.sort((a,b)=>b.date.localeCompare(a.date));if(unique.length<100)throw new Error("отримано лише "+unique.length+" коректних тиражів");draws=unique;status.textContent="✅ Live-база: завантажено "+draws.length.toLocaleString("uk-UA")+" офіційних тиражів."}catch(error){draws=[...FALLBACK_DRAWS].sort((a,b)=>b.date.localeCompare(a.date));status.textContent="⚠️ Live-база недоступна: "+error.message+". Використано резервні "+draws.length+" тиражів."}}
+function buildStats(history,field,max){const out=Array.from({length:max},(_,i)=>({number:i+1,count:0,last:9999,weighted:0}));history.forEach((draw,index)=>{const values=field==="main"?draw.main:[draw.powerball];values.forEach(number=>{const item=out[number-1];item.count+=1;item.last=Math.min(item.last,index);item.weighted+=Math.exp(-index/30)})});const maxCount=Math.max(1,...out.map(x=>x.count)),maxWeighted=Math.max(1,...out.map(x=>x.weighted));return out.map(item=>({...item,score:.5*item.count/maxCount+.3*item.weighted/maxWeighted+.2*(item.last<9999?Math.exp(-item.last/20):0)}))}
+function topNumbers(history,field,max,count){return buildStats(history,field,max).sort((a,b)=>b.count-a.count||a.last-b.last).slice(0,count).map(x=>x.number)}
+function corePool(history,size){return buildStats(history,"main",MAIN_MAX).sort((a,b)=>b.score-a.score).slice(0,size).map(x=>x.number)}
+function powerballPool(history,size=12){return buildStats(history,"powerball",PB_MAX).sort((a,b)=>b.score-a.score).slice(0,size).map(x=>x.number)}
+const pairKey=(a,b)=>a<b?a+"-"+b:b+"-"+a;
+function generateLines(history,poolSize=18,count=7){const pool=corePool(history,poolSize),pbs=shuffle(powerballPool(history,12)),pairUsage=new Map(),lines=[];for(let lineIndex=0;lineIndex<count;lineIndex++){let best=null,bestPenalty=Infinity;for(let trial=0;trial<500;trial++){const main=shuffle(pool).slice(0,5).sort((a,b)=>a-b),odd=main.filter(n=>n%2===1).length,low=main.filter(n=>n<=34).length;let penalty=Math.abs(odd-2.5)*2+Math.abs(low-2.5)*2;for(let i=0;i<5;i++)for(let j=i+1;j<5;j++)penalty+=(pairUsage.get(pairKey(main[i],main[j]))||0)*4;if(penalty<bestPenalty){bestPenalty=penalty;best=main}}for(let i=0;i<5;i++)for(let j=i+1;j<5;j++){const key=pairKey(best[i],best[j]);pairUsage.set(key,(pairUsage.get(key)||0)+1)}lines.push({main:best,powerball:pbs[lineIndex%pbs.length]})}return{pool,lines,uniqueMain:new Set(lines.flatMap(line=>line.main)).size}}
+function randomLines(count=7){const allMain=Array.from({length:MAIN_MAX},(_,i)=>i+1);return Array.from({length:count},()=>({main:shuffle(allMain).slice(0,5).sort((a,b)=>a-b),powerball:1+Math.floor(Math.random()*PB_MAX)}))}
+function scoreLines(lines,target){let bestMain=0,powerballHits=0,linesWithThreePlus=0;lines.forEach(line=>{const mainHits=line.main.filter(n=>target.main.includes(n)).length;bestMain=Math.max(bestMain,mainHits);if(mainHits>=3)linesWithThreePlus++;if(line.powerball===target.powerball)powerballHits++});return{bestMain,powerballHits,linesWithThreePlus}}
+async function runBacktest(onProgress){const chronological=[...draws].sort((a,b)=>a.date.localeCompare(b.date)),warmup=Math.min(100,Math.max(20,Math.floor(chronological.length*.25))),tests=Math.min(300,chronological.length-warmup);if(tests<20)throw new Error("Недостатньо історичних тиражів для backtest.");const start=chronological.length-tests,method={best:0,pb:0,three:0},random={best:0,pb:0,three:0},randomRuns=40;for(let index=start;index<chronological.length;index++){const history=chronological.slice(0,index).reverse(),target=chronological[index],methodScore=scoreLines(generateLines(history,18,7).lines,target);let baseline={bestMain:0,powerballHits:0,linesWithThreePlus:0};for(let run=0;run<randomRuns;run++){const score=scoreLines(randomLines(7),target);baseline.bestMain+=score.bestMain/randomRuns;baseline.powerballHits+=score.powerballHits/randomRuns;baseline.linesWithThreePlus+=score.linesWithThreePlus/randomRuns}method.best+=methodScore.bestMain;method.pb+=methodScore.powerballHits;method.three+=methodScore.linesWithThreePlus;random.best+=baseline.bestMain;random.pb+=baseline.powerballHits;random.three+=baseline.linesWithThreePlus;if((index-start)%5===0||index===chronological.length-1){onProgress(Math.round(((index-start+1)/tests)*100));await new Promise(resolve=>setTimeout(resolve,0))}}return{tests,warmup,method:{avgBest:method.best/tests,pb:method.pb,three:method.three},random:{avgBest:random.best/tests,pb:random.pb,three:random.three}}}
+function drawRow(draw,label=""){return `<div class="draw-row"><span class="date">${label||formatDate(draw.date)}</span>${draw.main.map(n=>`<span class="ball">${n}</span>`).join("")}<span class="ball pb">${draw.powerball}</span></div>`}
+function renderData(){$("#drawCount").textContent=draws.length.toLocaleString("uk-UA");$("#lastDate").textContent=formatDate(draws[0].date);$("#hotMain").textContent=topNumbers(draws,"main",MAIN_MAX,5).join(", ");$("#hotPB").textContent=topNumbers(draws,"powerball",PB_MAX,4).join(", ");$("#recentDraws").innerHTML=draws.slice(0,5).map(draw=>drawRow(draw)).join("")}
+function renderGeneratedLines(){const size=Number($("#poolSize").value),result=generateLines(draws,size,7);currentLines=result.lines;$("#generatedLines").innerHTML=result.lines.map((draw,i)=>drawRow(draw,"Лінія "+(i+1))).join("");$("#coverage").textContent="Core Pool: "+result.pool.join(", ")+" · Унікальних основних чисел у 7 лініях: "+result.uniqueMain}
+$("#poolSize").addEventListener("input",event=>{$("#poolSizeValue").textContent=event.target.value});
+$("#generateBtn").addEventListener("click",renderGeneratedLines);
+$("#copyBtn").addEventListener("click",async()=>{const text=currentLines.map((line,i)=>(i+1)+". "+line.main.join(" ")+" | PB "+line.powerball).join("\n");try{await navigator.clipboard.writeText(text);$("#copyBtn").textContent="Скопійовано ✓"}catch{window.prompt("Скопіюй лінії:",text)}setTimeout(()=>$("#copyBtn").textContent="Копіювати",1200)});
+$("#backtestBtn").addEventListener("click",async()=>{const button=$("#backtestBtn"),output=$("#backtestResult"),bar=$("#progressBar");button.disabled=true;output.textContent="Підготовка backtest…";bar.style.width="0%";try{const result=await runBacktest(progress=>{bar.style.width=progress+"%";output.textContent="Backtest: "+progress+"%"}),avgDelta=result.method.avgBest-result.random.avgBest;output.innerHTML=`<table><tr><th>Метрика</th><th>Balanced Core</th><th>Random baseline</th></tr><tr><td>Середній найкращий збіг основних</td><td>${result.method.avgBest.toFixed(3)}</td><td>${result.random.avgBest.toFixed(3)}</td></tr><tr><td>Різниця середнього збігу</td><td colspan="2">${avgDelta>=0?"+":""}${avgDelta.toFixed(3)}</td></tr><tr><td>Лінії з 3+ основними</td><td>${result.method.three}</td><td>${result.random.three.toFixed(1)}</td></tr><tr><td>Збіги Powerball</td><td>${result.method.pb}</td><td>${result.random.pb.toFixed(1)}</td></tr></table><p class="small">Перевірено ${result.tests} послідовних тиражів; warm-up ${result.warmup}; random baseline — 40 симуляцій на кожен тираж. Історична перевага не гарантує майбутнього виграшу.</p>`}catch(error){output.textContent="❌ "+error.message}finally{button.disabled=false}});
+async function initialise(){await loadDraws();renderData();renderGeneratedLines()}
+initialise();
+</script>
+</body>
+</html>
